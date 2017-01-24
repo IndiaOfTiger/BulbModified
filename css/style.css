@@ -1,6 +1,9 @@
 html, body, #Location-map{
     min-height: 87%;
     height:87%;
+html, body{
+    min-height: 100%;
+    height:100%;
 }
 
 
@@ -20,8 +23,12 @@ h2 {
     position: fixed;
     left: 0%;
     top: 0%;
+<<<<<<< HEAD
     height: 60%;
     width: 100%;
+=======
+    width: 70%;
+>>>>>>> 7a8f94c69e2a0af12ba783f3ee0470b06032ce1e
     border-color: #005180;
     border-width: 2px;
     border-style: dashed;
@@ -84,9 +91,14 @@ h2 {
     background-color: rgba(51,87,134,0.8);
     position: relative;
     height:40%;
+<<<<<<< HEAD
     width:100%;
     right: 0%;
     bottom: 0%;
+    width:60%;
+    left: 0%;
+    bottom: 0%;
+    margin-left: -30%;
     border-color: #000000;
     border-width: 2px;
     border-style: solid;

@@ -61,5 +61,66 @@
    </div>
    <div id = "UserData"></div> !-->
  
+    <div id="Location-map"></div>
+    <div id="Geo-Info">
+      <section id="lat">
+        <h2>Lat:</h2>
+        <span></span>
+      </section>
+      <section id="lng">
+        <h2>Lng:</h2>
+        <span></span>
+      </section>
+      <label>Note: Map will be adjusted according to new (lat,lng)</label>
+   </div>
+   <div id="Marker-Info">
+    <section id ="markers">
+      <h2>Markers:</h2>
+      <br>
+      <span></span>
+    </section>
+  </div>
+  
+  <div id="container">
+   <div id="color_wrapper">
+   <!--
+     <input type="button" class="button" id="red" onclick="push('Color-I',[255,0,0])" value="RED"/>
+     <input type="button" class="button" id="orange" onclick="push('Color-I',[255,85,17])" value="ORANGE"/>
+     <input type="button" class="button" id="purple" onclick="push('Color-I',[102,0,255])" value="PURPLE"/> 
+     <input type="button" class="button" id="green" onclick="push('Color-I',[0,255,0])" value="GREEN"/>
+   !-->
+     <input type="button" class="button" id="red" value="RED"/>
+     <input type="button" class="button" id="orange" value="ORANGE"/>
+     <input type="button" class="button" id="purple" value="PURPLE"/> 
+     <input type="button" class="button" id="green" value="GREEN"/>
+   </div>
+   <div id="text_wrapper">
+     <input type="number" id="lat" placeholder="Input Latitude: (-16,54)" />
+     <input type="number" id="lng" placeholder="Input Longitude: (61,179)" />
+     <input type="text" id="description" placeholder="Input Description:" />
+   </div>
+   <div id="send">
+     <button type="button" id ="submit">Submit!</button>
+   </div>
+
+   <div id="markers_added">
+     <span></span>
+   </div>
+   <div id="eq_instruction">
+     <p>Select two buttons for equivalence relationship</p>
+   </div>
+   <div id="eq_send">
+     <button type="button" id ="eq_submit">Add pair!</button>
+   </div>
+  </div>
+   <!-- <div id = "user-add">
+      <h2>Lat: <input type = "text" id = "SiteName"> </h2>
+      <br>
+      <h2>Lng: <input type = "text" id = "UVI"> </h2>
+      <br>
+      <button id ="AddLo"><h2>Add!</h2></button>
+  </div>
+  <div id = "UserData"></div> !-->
+
   </body>
 <html>
