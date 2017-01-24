@@ -9,17 +9,27 @@ const dai = function (profile, ida) {
         return s() + s() + s();
     })();
 
+    // Not Sure
     if (profile.is_sim == undefined){
         profile.is_sim = false;
     }
+    //
 
-    for (var i = 0; i < profile.df_list.length; i++) {
-        df_name = profile.df_list[i].name.replace(/_/g, '-')
-        df_func[df_name] = profile.df_list[i];
-        console.log(df_func[df_name]);
-        profile.df_list[i] = df_name;
-        console.log(df_name);
+    function setUpName(dfList)
+    {
+        for (var i = 0; i < dfList.length; i++) {
+            df_name = dfList[i].name.replace(/_/g, '-')
+            df_func[df_name] = dfList[i];
+            console.log(df_func[df_name]);
+            dfList[i] = df_name;
+            console.log(df_name);
+        }
     }
+
+    setUpName(profile.odf_list);
+    setUpName(profile.idf_list);
+
+
 
     function pull (odf_name, data) {
         if (odf_name == 'Control') {

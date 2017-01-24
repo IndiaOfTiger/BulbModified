@@ -6,7 +6,8 @@ var dan = (function () {
     var _mac_addr = '';
     var _profile = {};
     var _registered = false;
-    var _df_list;
+    var _idf_list;
+    var _odf_list;
     var _df_selected = {};
     var _df_is_odf = {};
     var _df_timestamp = {};
@@ -40,15 +41,24 @@ var dan = (function () {
             if (result) {
                 if (!_registered) {
                     _registered = true;
-                    _df_list = profile['df_list'].slice();
-                    for (var i = 0; i < _df_list.length; i++) {
-                        _df_selected[_df_list[i]] = false;
-                        _df_is_odf[_df_list[i]] = true;
-                        _df_timestamp[_df_list[i]] = '';
+                    _idf_list = profile['idf_list'].slice();
+                    _odf_list = profile['odf_list'].slice();
+                    for (var i = 0; i < _odf_list.length; i++) {
+                        _df_selected[_odf_list[i]] = false;
+                        _df_is_odf[_odf_list[i]] = true;
+                        _df_timestamp[_odf_list[i]] = '';
+                        _ctl_timestamp = '';
+                        _suspended = true;
+                    }
+                    for (var i = 0; i < _idf_list.length; i++) {
+                        _df_selected[_idf_list[i]] = false;
+                        _df_is_odf[_idf_list[i]] = false;
+                        _df_timestamp[_idf_list[i]] = '';
                         _ctl_timestamp = '';
                         _suspended = true;
                     }
                     setTimeout(pull_ctl, 0);
+                    setTimeout(push_ctl, 0);
                 }
                 callback(true);
             } else {
@@ -93,12 +103,12 @@ var dan = (function () {
             return;
         }
 
-        if (_suspended || index >= _df_list.length) {
+        if (_suspended || index >= _odf_list.length) {
             setTimeout(pull_ctl, POLLING_INTERVAL);
             return;
         }
 
-        var _df_name = _df_list[index];
+        var _df_name = _odf_list[index];
 
         if (!_df_is_odf[_df_name] || !_df_selected[_df_name]) {
             pull_odf(index + 1);
@@ -106,9 +116,9 @@ var dan = (function () {
         }
 
         function pull_odf_callback (dataset, error) {
-            if (has_new_data(dataset, _df_timestamp[_df_list[index]])) {
-                _df_timestamp[_df_list[index]] = dataset[0][0];
-                _pull(_df_list[index], dataset[0][1]);
+            if (has_new_data(dataset, _df_timestamp[_odf_list[index]])) {
+                _df_timestamp[_odf_list[index]] = dataset[0][0];
+                _pull(_odf_list[index], dataset[0][1]);
             }
 
             pull_odf(index + 1);
@@ -126,13 +136,13 @@ var dan = (function () {
             break;
         case 'SET_DF_STATUS':
             flags = data[1]['cmd_params'][0]
-            if (flags.length != _df_list.length) {
-                console.log(flags, _df_list);
+            if (flags.length != _odf_list.length) {
+                console.log(flags, _odf_list);
                 return false;
             }
 
-            for (var i = 0; i < _df_list.length; i++) {
-                _df_selected[_df_list[i]] = (flags[i] == '1');
+            for (var i = 0; i < _odf_list.length; i++) {
+                _odf_selected[_odf_list[i]] = (flags[i] == '1');
             }
             break;
         default:
