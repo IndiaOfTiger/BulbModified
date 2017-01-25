@@ -141,7 +141,7 @@ var dan = (function () {
             return;
         }
 
-        if (index >= _df_list.length) {
+        if (index >= _idf_list.length) {
             setTimeout(push_ctl, POLLING_INTERVAL);
             return;
         }
@@ -152,7 +152,7 @@ var dan = (function () {
         function push_idf_callback () {
             push_idf(index + 1);
         }
-        csmapi.push(_mac_addr, _df_name,profile['odf_list'], push_idf_callback);
+        csmapi.push(_mac_addr, _df_name,profile['idf_list'], push_idf_callback);
     }
 
     function handle_command_message (data) {
@@ -165,13 +165,13 @@ var dan = (function () {
             break;
         case 'SET_DF_STATUS':
             flags = data[1]['cmd_params'][0]
-            if (flags.length != _odf_list.length) {
-                console.log(flags, _odf_list);
+            if (flags.length != _idf_list.length) {
+                console.log(flags, _idf_list);
                 return false;
             }
 
-            for (var i = 0; i < _odf_list.length; i++) {
-                _odf_selected[_odf_list[i]] = (flags[i] == '1');
+            for (var i = 0; i < _idf_list.length; i++) {
+                _odf_selected[_idf_list[i]] = (flags[i] == '1');
             }
             break;
         default:
