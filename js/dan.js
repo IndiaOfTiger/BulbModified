@@ -123,7 +123,36 @@ var dan = (function () {
 
             pull_odf(index + 1);
         }
-        csmapi.pull(_mac_addr, _df_name, pull_odf_callback);
+        csmapi.pull(_mac_addr, _df_name,profile['odf_list'], pull_odf_callback);
+    }
+
+    function push_ctl () {
+
+        if (!_registered) {
+            return;
+        }
+        push_idf(0);
+
+    }
+
+    function push_idf (index) {
+
+        if (!_registered) {
+            return;
+        }
+
+        if (index >= _df_list.length) {
+            setTimeout(push_ctl, POLLING_INTERVAL);
+            return;
+        }
+
+        var _df_name = _idf_list[index];
+
+
+        function push_idf_callback () {
+            push_idf(index + 1);
+        }
+        csmapi.push(_mac_addr, _df_name,profile['odf_list'], push_idf_callback);
     }
 
     function handle_command_message (data) {
