@@ -15,7 +15,7 @@ const dai = function (profile, ida) {
     }
     //
 
-    function setUpName(dfList)
+    /*function setUpName(dfList)
     {
         for (var i = 0; i < dfList.length; i++) {
             df_name = dfList[i].name.replace(/_/g, '-')
@@ -27,8 +27,20 @@ const dai = function (profile, ida) {
     }
 
     setUpName(profile.odf_list);
-    setUpName(profile.idf_list);
+    setUpName(profile.idf_list);*/
+    for (var i = 0; i < profile.idf_list.length; i++) {
+        df_name = profile.idf_list[i].name.replace(/_/g, '-')
+        df_func[df_name] = profile.idf_list[i];
+        profile.idf_list[i] = df_name;
+        console.log(df_name);
+    }
 
+    for (var i = 0; i < profile.odf_list.length; i++) {
+        df_name = profile.odf_list[i].name.replace(/_/g, '-')
+        df_func[df_name] = profile.odf_list[i];
+        profile.odf_list[i] = df_name;
+        console.log(df_name);
+    }
 
 
     function pull (odf_name, data) {
@@ -69,6 +81,6 @@ const dai = function (profile, ida) {
     window.onbeforeunload = deregister;
     window.onclose = deregister;
     window.onpagehide = deregister;
-
+    console.log('call dan lo');
     dan.init(pull, csmapi.get_endpoint(), mac_addr, profile, init_callback);
 };

@@ -6,16 +6,20 @@ var dan = (function () {
     var _mac_addr = '';
     var _profile = {};
     var _registered = false;
-    var _idf_list;
-    var _odf_list;
+    var _idf_list=[];
+    var _odf_list=[];
     var _df_selected = {};
     var _df_is_odf = {};
     var _df_timestamp = {};
     var _suspended = true;
     var _ctl_timestamp = '';
+    var _origin_idf_list=[];
+    var _origin_odf_list=[];
 
     function init (pull, endpoint, mac_addr, profile, callback) {
         _pull = pull;
+        //_origin_idf_list=profile.origin_idf_list;
+        //_origin_odf_list=profile.origin_odf_list;
         _mac_addr = mac_addr;
 
         function init_callback (result) {
@@ -43,6 +47,8 @@ var dan = (function () {
                     _registered = true;
                     _idf_list = profile['idf_list'].slice();
                     _odf_list = profile['odf_list'].slice();
+_origin_idf_list = profile['origin_idf_list'].slice();
+_origin_odf_list = profile['origin_odf_list'].slice();
                     for (var i = 0; i < _odf_list.length; i++) {
                         _df_selected[_odf_list[i]] = false;
                         _df_is_odf[_odf_list[i]] = true;
@@ -57,12 +63,12 @@ var dan = (function () {
                         _ctl_timestamp = '';
                         _suspended = true;
                     }
-                    setTimeout(pull_ctl, 0);
+                    //setTimeout(pull_ctl, 0);
                     setTimeout(push_ctl, 0);
                 }
                 callback(true);
             } else {
-                console.log(result);
+                //console.log(result);
                 if (retry_count < 2) {
                     retry_count += 1;
                     setTimeout(function () {
@@ -123,16 +129,33 @@ var dan = (function () {
 
             pull_odf(index + 1);
         }
-        csmapi.pull(_mac_addr, _df_name,profile['odf_list'], pull_odf_callback);
+        csmapi.pull(_mac_addr, _df_name,/*_odf_list,*/ pull_odf_callback);
     }
-
+////////////////////////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////////////////////////
     function push_ctl () {
 
         if (!_registered) {
             return;
         }
+        /*function push_ctl_callback (dataset, error) {
+            if (has_new_data(dataset, _ctl_timestamp)) {
+                _ctl_timestamp = dataset[0][0];
+                if (handle_command_message(dataset[0][1])) {
+                    _pull('Control', dataset[0][1]);
+                } else {
+                    console.log('Problematic command message:', dataset[0][1]);
+                }
+            }
+            push_idf(0);
+        }*/
         push_idf(0);
-
+        
+        //csmapi.push(_mac_addr, '__Ctl_I__',_origin_idf_list, push_ctl_callback);
     }
 
     function push_idf (index) {
@@ -152,7 +175,9 @@ var dan = (function () {
         function push_idf_callback () {
             push_idf(index + 1);
         }
-        csmapi.push(_mac_addr, _df_name,profile['idf_list'], push_idf_callback);
+        console.log(_df_name);
+console.log(_origin_idf_list[index]());
+        csmapi.push(_mac_addr, _df_name , _origin_idf_list[index]() , push_idf_callback);
     }
 
     function handle_command_message (data) {
@@ -165,13 +190,14 @@ var dan = (function () {
             break;
         case 'SET_DF_STATUS':
             flags = data[1]['cmd_params'][0]
-            if (flags.length != _idf_list.length) {
+            /*if (flags.length != _idf_list.length) {
                 console.log(flags, _idf_list);
                 return false;
-            }
+            }*/
 
             for (var i = 0; i < _idf_list.length; i++) {
-                _odf_selected[_idf_list[i]] = (flags[i] == '1');
+                _df_selected[_idf_list[i]] = (flags[i] == '1');
+console.log(flags);
             }
             break;
         default:
@@ -183,6 +209,7 @@ var dan = (function () {
 
     function has_new_data (dataset, timestamp) {
         if (dataset.length == 0 || timestamp == dataset[0][0]) {
+ console.log('newnewnewnew');
             return false;
         }
         return true;
