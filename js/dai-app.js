@@ -4,7 +4,6 @@ $(
         center: {lat: 23.5832340, lng: 120.5825975},
         zoom: 3});
     }
-
 );
 // https://developers.google.com/maps/documentation/javascript/examples/polyline-simple?hl=zh-tw
 /////////////
@@ -33,6 +32,8 @@ $(function(){
         var temp_b;
         var temp_lat;
         var temp_lng;
+        var _lat;
+        var _lng;
         var description;
         var EQ_1;
         var EQ_2;
@@ -54,6 +55,88 @@ $(function(){
                              {alert('Error');}
                              });
                             }); */
+        google.maps.event.addListener(map,"click", function(event){
+            
+            var str = prompt('Where is this place?','toilet');
+            if(str)
+            {
+                deleteMarkers();//doesn't work
+                marker_Click = new google.maps.Marker({
+                    map: map,
+                    position:event.latLng,
+                    content: str
+                }); 
+                var temp_pos = event.latLng;
+                var temp_lat = temp_pos.lat();
+                var temp_lng = temp_pos.lng();
+                $('#lat').val(temp_lat) ; 
+                $('#lng').val(temp_lng) ;
+                $('#description').val(str) ;
+            }
+                 
+        });
+        $('#submit').on('click', function(){
+            $('#submit').toggle(500).toggle(500);
+            var temp_lat = _lat;
+            var temp_lng = _lng;
+            _lat = parseInt($('#lat').val()); // -16, 54
+            if(_lat < -16 || _lat > 54)
+            {
+                alert("Invalid input!");
+                $('#lat').val("");
+                _lat = temp_lat;
+                _lng = temp_lng;
+                return false;
+            }
+            _lng = parseInt($('#lng').val()); // 61, 179
+            if(_lng < 61 || _lng > 179)
+            {
+                alert("Invalid input!");
+                $('#lng').val("");
+                _lng = temp_lng;
+                _lat = temp_lat;
+                return false;
+            }
+            description = $('#description').val();
+            console.log("lat", _lat);
+            console.log("lng", _lng);
+            console.log("description", description);
+            $('#lat').val("");
+            $('#lng').val("");
+            $('#description').val("");
+
+            if($('#red').hasClass('clicked'))
+            {
+                r = 255;
+                g = 0;
+                b = 0;
+            }
+            if($('#orange').hasClass('clicked'))
+            {
+                r = 255;
+                g = 85;
+                b = 17;
+            }
+            if($('#purple').hasClass('clicked'))
+            {
+                r = 102;
+                g = 0;
+                b = 255;
+            }
+            if($('#green').hasClass('clicked'))
+            {
+                r = 0;
+                g = 255;
+                b = 0;
+            }        
+        });
+
+        $('.button').on('click', function() {
+            $('.button').removeClass('clicked');
+            $(this).toggleClass('clicked');
+        });
+    
+
         function Color_I () {
             var arr = [];
             arr.push(r);
@@ -67,6 +150,7 @@ $(function(){
             arr.push(_lat);
             arr.push(_lng);
             return arr;
+            
         }
 
         function Description_I(){
@@ -155,9 +239,7 @@ $(function(){
         }
 
         function domUpdater() {
-            // Try to only update once
-            //gg++;
-            //console.log(gg);
+            
             latDom.text(output.lat);
             lngDom.text(output.lng);
             //addMarker(output.lat, output.lng);
@@ -165,7 +247,7 @@ $(function(){
         }
         requestAnimationFrame(domUpdater); // Refresh Page
 
-        function addMarker(lat, lng)
+        /*function addMarker(lat, lng)
         {
             if(lat == 0 && lng == 0)
                 return;
@@ -192,16 +274,16 @@ $(function(){
                                });
             markers.push(marker);
 
-        }
+        }*/
         $(document).on('click', '.delete', function(){
                 $(this).remove();
                 index = $(this).val();
                 markers[index].setMap(null);
             });
-
+console.log('call ida la');
         //addMarker(output.lat, output.lng);
 
-        var i = 0, total_Marker = 5;
+        /*var i = 0, total_Marker = 5;
         function succesiveMarker() {
             console.log('i:'+i);
             if( i < total_Marker )
@@ -210,9 +292,9 @@ $(function(){
                 setTimeout( succesiveMarker, 2000 );
                 i++;
             }
-        }
+        }*/
         //succesiveMarker();
-        function setMapOnAll(map) {
+       function setMapOnAll(map) {
           for (var i = 1; i < markers.length; i++) {
             markers[i].setMap(map);
           }
@@ -323,11 +405,10 @@ $(function(){
         {
             document.getElementById('lat');
             document.getElementById('lng')
-
         }*/
         setTimeout(iotUpdater, interval); // Will this cause loop?
         //requestAnimationFrame(domUpdater);
-        /*
+        
         function detach() {
             window.d_name = null;
             IoTtalk.detach(mac);
@@ -335,20 +416,23 @@ $(function(){
         window.onunload = detach;
         window.onbeforeunload = detach;
         window.onclose = detach;
-        window.onpagehide = detach;*/ // Didn't use , what's the purpose?
+        window.onpagehide = detach;// Didn't use , what's the purpose?
+console.log('call profile la');
         var profile = {
             'dm_name': 'BulbModified',
             'odf_list': [Color_O, GeoLo_O, Description_O, EQ_O],
             'idf_list': [Color_I, GeoLo_I, Description_I, EQ_I],
+            'origin_odf_list': [Color_O, GeoLo_O, Description_O, EQ_O],
+            'origin_idf_list': [Color_I, GeoLo_I, Description_I, EQ_I],
+            'is_sim': false,
+            'df_list':['Color-O', 'GeoLo-O', 'Description-O', 'EQ-O', 'Color-I', 'GeoLo-I', 'Description-I', 'EQ-I'],
         }
-
+console.log('call ida la');
         var ida = {
             'iot_app': iot_app,
         }; // How iot device receive data (format)
+ console.log('call dai la');
         dai(profile,ida);
+       
         
 });
-
-
-
-
