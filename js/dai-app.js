@@ -4,8 +4,11 @@ $(
         center: {lat: 23.5832340, lng: 120.5825975},
         zoom: 3});
     }
-    
 );
+// https://developers.google.com/maps/documentation/javascript/examples/polyline-simple?hl=zh-tw
+/////////////
+/////////////
+// $(function() function initMap()); Doesn't Work!
 $(function(){
         var pinColor = "ffffff";
         var pinImage = new google.maps.MarkerImage("http://chart.apis.google.com/chart?chst=d_map_pin_letter&chld=%E2%80%A2|" + pinColor,
@@ -35,6 +38,51 @@ $(function(){
         var EQ_1;
         var EQ_2;
         var parent = [];
+        /* var $Name = $('#Name');
+        var $Lat = $('#Lat');
+        var $Lng = $('#Lng');
+        $('#AddLo').on('click', function(){
+                             var Location = {Name: $Name.val(),Lat: $Lat.val(), Lng: $Lng.val()};
+                             $.ajax({
+                             type: 'POST',
+                             url: 'http://localhost/GeoLo/index.html',
+                             data: Location,
+                             success: function(NewLocation){
+                             $('#UserData').append('<li>' + Location.Name + '</li>'),
+                             addMarker(Location.Lat, Location.Lng);
+                             },
+                             error: function()
+                             {alert('Error');}
+                             });
+                            }); */
+        google.maps.event.addListener(map,"click", function(event){            
+            var str = prompt('Where is this place?','toilet');
+            if(str)
+            {
+                deleteMarkers();//doesn't work
+                markersDom.append('<button class=".btn-default delete" >'+event.latLng+'</button>');
+                var infowindow = new google.maps.InfoWindow(
+                {
+                   content: str
+                });
+                var marker_Click = new google.maps.Marker({
+                    map: map,
+                    position:event.latLng,
+                    content: str
+                }); 
+                marker_Click.addListener('click', function() {
+                               infowindow.open(map, marker_Click);
+                });
+                markers.push(marker_Click);
+                var temp_pos = event.latLng;
+                var ttemp_lat = temp_pos.lat();
+                var ttemp_lng = temp_pos.lng();
+                $('#lat').val(ttemp_lat) ; 
+                $('#lng').val(ttemp_lng) ;
+                $('#description').val(str) ;
+            }
+                 
+        });
         $('#submit').on('click', function(){
             $('#submit').toggle(500).toggle(500);
             var temp_lat = _lat;
@@ -133,7 +181,7 @@ $(function(){
             b = data[2];
             
             console.log(data);
-            //addMarker(lat, lng);
+            //addMarker(23, 120);
         }
         function Description_O (data)
         {
@@ -168,8 +216,9 @@ $(function(){
             console.log(data);
             console.log("data[0]:", data[0]);
             console.log("data[1]:", data[1]);
+            addMarker(lat, lng);
+        }
 
-        }/*
         function changepinImage()
         {
             //console.log('hi');
@@ -181,7 +230,7 @@ $(function(){
             new google.maps.Point(0,0),
             new google.maps.Point(10, 34));
             //console.log(pinImage);
-        }*/
+        }
 
         function iot_app(){
             r = 40;
@@ -205,15 +254,43 @@ $(function(){
             //addMarker(output.lat, output.lng);
             requestAnimationFrame(domUpdater);
         }
+
         requestAnimationFrame(domUpdater); // Refresh Page
 
-        
+        function addMarker(lat, lng)
+        {
+console.log("LOL");
+            if(lat == 0 && lng == 0)
+                return;
+            var index;
+            index = markers.length;
+            var string;
+            var _lat = lat;
+            var _lng = lng;
+            string = '('  + lat + ',' + lng + ')' + '\n';
+            //markersDom.append(document.createTextNode(string));
+            markersDom.append('<button class=".btn-default delete" value = "'+index+'">'+string+'</button>');
+            changepinImage();
+            console.log(pinColor);
+            var infowindow = new google.maps.InfoWindow(
+               {
+                   content: description
+               });
+            var marker = new google.maps.Marker({
+                position:{ lat: lat, lng: lng },
+                map: map, 
+                icon: pinImage,});
+            marker.addListener('click', function() {
+                               infowindow.open(map, marker);
+                               });
+            markers.push(marker);
+
+        }
         $(document).on('click', '.delete', function(){
                 $(this).remove();
                 index = $(this).val();
                 markers[index].setMap(null);
             });
-console.log('call ida la');
         
        function setMapOnAll(map) {
           for (var i = 1; i < markers.length; i++) {
@@ -241,15 +318,13 @@ console.log('call ida la');
             output.lat = position.coords.latitude;
             output.lng = position.coords.longitude;
         }
-        //var kk = 0;
+
         function iotUpdater() {
-            //console.log(kk);
             if( navigator.geolocation )
             {
                 navigator.geolocation.getCurrentPosition(showPosition);
                 //deleteMarkers();
                 i = 0;
-                //succesiveMarker();
             }
         
             //if( window.d_name )
@@ -319,33 +394,39 @@ console.log('call ida la');
               markersLine.setMap(map);
               //polyCoordinates.length = 0;
         }
+        /*$('#id').on('click', function()
+            getLocation();
+            )
+        function getLocation()
+        {
+            document.getElementById('lat');
+            document.getElementById('lng')
+        }*/
         setTimeout(iotUpdater, interval); // Will this cause loop?
         //requestAnimationFrame(domUpdater);
-        /*
-        function detach() {
+        
+        /*function detach() {
             window.d_name = null;
             IoTtalk.detach(mac);
-        }
-        window.onunload = detach;
+        }*/
+        /*window.onunload = detach;
         window.onbeforeunload = detach;
         window.onclose = detach;
-        window.onpagehide = detach;*/ // Didn't use , what's the purpose?
-console.log('call profile la');
+        window.onpagehide = detach;*/// Didn't use , what's the purpose?
         var profile = {
             'dm_name': 'BulbModified',
-            'odf_list': [Color_O, GeoLo_O, Description_O, EQ_O],
-            'idf_list': [Color_I, GeoLo_I, Description_I, EQ_I],
-            'origin_odf_list': [Color_O, GeoLo_O, Description_O, EQ_O],
-            'origin_idf_list': [Color_I, GeoLo_I, Description_I, EQ_I],
+            'odf_list': [GeoLo_O,Color_O, Description_O, EQ_O/*, GeoLo_O*/],
+            'idf_list': [GeoLo_I,Color_I, Description_I, EQ_I/*, GeoLo_I*/],
+            'origin_odf_list': [GeoLo_O,Color_O, Description_O, EQ_O/*, GeoLo_O*/],
+            'origin_idf_list': [GeoLo_I,Color_I, Description_I, EQ_I/*, GeoLo_I*/],
             'is_sim': false,
-            'df_list':['Color-O', 'GeoLo-O', 'Description-O', 'EQ-O', 'Color-I', 'GeoLo-I', 'Description-I', 'EQ-I'],
+            'df_list':['GeoLo-O','Color-O', 'Description-O', 'EQ-O'/*, 'GeoLo-O'*/,'GeoLo-I', 'Color-I', 'Description-I', 'EQ-I'/*, 'GeoLo-I'*/],
         }
 console.log('call ida la');
         var ida = {
             'iot_app': iot_app,
         }; // How iot device receive data (format)
  console.log('call dai la');
-        dai(profile,ida);
-       
+        dai(profile,ida);       
         
 });
