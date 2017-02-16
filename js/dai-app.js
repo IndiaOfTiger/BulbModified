@@ -59,7 +59,7 @@ $(function(){
             var str = prompt('Where is this place?','toilet');
             if(str)
             {
-                deleteMarkers();//doesn't work
+                //deleteMarkers();//doesn't work
                 markersDom.append('<button class=".btn-default delete" >'+event.latLng+'</button>');
                 var infowindow = new google.maps.InfoWindow(
                 {
@@ -74,6 +74,18 @@ $(function(){
                                infowindow.open(map, marker_Click);
                 });
                 markers.push(marker_Click);
+/*var oldBounds = null;
+var quadTree = new QuadTree(markers);
+console.log("Built quadtree with size "+quadTree.size);
+google.maps.event.addListener(map,'idle', function() {
+    if(oldBounds !== null) {
+        quadTree.queryRectangle(oldBounds).map(function(x){x.setMap(null);});
+        console.log("Old bounds:"+oldBounds);
+    }
+    var bounds = map.getBounds();
+    quadTree.queryRectangle(bounds).map(function(x){x.setMap(map);});
+    oldBounds = bounds;
+});*/
                 var temp_pos = event.latLng;
                 var ttemp_lat = temp_pos.lat();
                 var ttemp_lng = temp_pos.lng();
@@ -87,7 +99,7 @@ $(function(){
             $('#submit').toggle(500).toggle(500);
             var temp_lat = _lat;
             var temp_lng = _lng;
-            _lat = parseInt($('#lat').val()); // -16, 54
+            _lat = parseFloat($('#lat').val()); // -16, 54
             if(_lat < -16 || _lat > 54)
             {
                 alert("Invalid input!");
@@ -96,7 +108,7 @@ $(function(){
                 _lng = temp_lng;
                 return false;
             }
-            _lng = parseInt($('#lng').val()); // 61, 179
+            _lng = parseFloat($('#lng').val()); // 61, 179
             if(_lng < 61 || _lng > 179)
             {
                 alert("Invalid input!");
@@ -293,7 +305,7 @@ console.log("LOL");
             });
         
        function setMapOnAll(map) {
-          for (var i = 1; i < markers.length; i++) {
+          for (var i = 0; i < markers.length; i++) {
             markers[i].setMap(map);
           }
         }
@@ -302,7 +314,6 @@ console.log("LOL");
         }
         function deleteMarkers() {
           clearMarkers();
-          markers = [];
         }
 
         function moveToLocation(lat, lng, zoom){
@@ -413,6 +424,79 @@ console.log("LOL");
         window.onbeforeunload = detach;
         window.onclose = detach;
         window.onpagehide = detach;*/// Didn't use , what's the purpose?
+        function QuadTree (points) {
+    this.root = null;
+    this.size =0;
+    for(var i = 0; i < points.length; i++)
+         this.add(points[i]);
+}
+function withinBounds(p, r) {
+    return  p.x > r.x1 && p.x < r.x2 && p.y > r.y1 && p.y < r.y2;
+}
+QuadTree.prototype.queryRectangle = function(bounds) {
+    console.log("Root:"+this.root.value[0].getPosition());
+    var points = [];
+    this.query2D(this.root, bounds, points);
+    return points;
+};
+// This is the problem function
+QuadTree.prototype.query2D = function( h,  r, points) {
+    if(h==null) return ;
+    var ne = r.getNorthEast();
+    var sw = r.getSouthWest();
+
+    var xmin = sw.lng();
+    var xmax = ne.lng();
+    var ymin = ne.lat();
+    var ymax = sw.lat();
+
+    var rect = {x1: xmin, x2: xmax, y1: ymax, y2: ymin};
+    if(withinBounds(h, rect)) {
+        console.log("Found "+h.x+" "+h.y);
+        for(var i = 0; i < h.value.length; i++) {
+            var p = h.value[i];
+            points.push(p);
+        }
+     }
+     if ( (xmin < h.x) &&  (ymin < h.y)){this.query2D(h.SW, r, points);};
+     if ( (xmin < h.x) && !(ymax < h.y)){this.query2D(h.NW, r, points);};
+     if (!(xmax < h.x) &&  (ymin < h.y)){this.query2D(h.SE, r, points);};
+     if (!(xmax < h.x) && !(ymax < h.y)){this.query2D(h.NE, r, points);};
+};
+// Other functions to make the quadtree work
+QuadTree.prototype.add = function(p) {
+    this.size++;
+    console.log("adding node"+p.getPosition());
+    this.root = this.insert(this.root,p);
+};
+QuadTree.prototype.insert = function insert(h, p) {
+    if(h== null) return new QuadTreeNode(p);
+    else if ( eq(p,h)) h.value.push(p);
+    else if ( lessX(p,h) &&  lessY(p,h)) h.SW = this.insert(h.SW, p);
+    else if ( lessX(p,h) && !lessY(p,h)) h.NW = this.insert(h.NW, p);
+    else if (!lessX(p,h) &&  lessY(p,h)) h.SE = this.insert(h.SE, p);
+    else if (!lessX(p,h) && !lessY(p,h)) h.NE = this.insert(h.NE, p);
+    return h;
+};
+function  lessX( p,  h) {
+    return p.getPosition().lat() < h.x;
+}
+function  lessY( p,  h) {
+    return p.getPosition().lng() < h.y;
+}
+function eq( p,  h) {
+    return p.getPosition().lat() == h.x && p.getPosition().lng() == h.y;
+}
+
+function QuadTreeNode(point) {
+    this.value = [point];
+    this.NW = null;
+    this.NE = null;
+    this.SW = null;
+    this.SE = null;
+    this.x = point.getPosition().lat();
+    this.y = point.getPosition().lng();
+}
         var profile = {
             'dm_name': 'BulbModified',
             'odf_list': [GeoLo_O,Color_O, Description_O, EQ_O/*, GeoLo_O*/],
