@@ -55,22 +55,42 @@ $(function(){
                              {alert('Error');}
                              });
                             }); */
-        google.maps.event.addListener(map,"click", function(event){
-            
+        google.maps.event.addListener(map,"click", function(event){            
             var str = prompt('Where is this place?','toilet');
             if(str)
             {
-                deleteMarkers();//doesn't work
-                marker_Click = new google.maps.Marker({
+                deleteMarkers();
+                markersDom.append('<button class=".btn-default delete" >'+event.latLng+'</button>');
+                var infowindow = new google.maps.InfoWindow(
+                {
+                   content: str
+                });
+                var marker_Click = new google.maps.Marker({
                     map: map,
                     position:event.latLng,
                     content: str
                 }); 
+                marker_Click.addListener('click', function() {
+                               infowindow.open(map, marker_Click);
+                });
+                markers.push(marker_Click);
+/*var oldBounds = null;
+var quadTree = new QuadTree(markers);
+console.log("Built quadtree with size "+quadTree.size);
+google.maps.event.addListener(map,'idle', function() {
+    if(oldBounds !== null) {
+        quadTree.queryRectangle(oldBounds).map(function(x){x.setMap(null);});
+        console.log("Old bounds:"+oldBounds);
+    }
+    var bounds = map.getBounds();
+    quadTree.queryRectangle(bounds).map(function(x){x.setMap(map);});
+    oldBounds = bounds;
+});*/
                 var temp_pos = event.latLng;
-                var temp_lat = temp_pos.lat();
-                var temp_lng = temp_pos.lng();
-                $('#lat').val(temp_lat) ; 
-                $('#lng').val(temp_lng) ;
+                var ttemp_lat = temp_pos.lat();
+                var ttemp_lng = temp_pos.lng();
+                $('#lat').val(ttemp_lat) ; 
+                $('#lng').val(ttemp_lng) ;
                 $('#description').val(str) ;
             }
                  
@@ -79,7 +99,7 @@ $(function(){
             $('#submit').toggle(500).toggle(500);
             var temp_lat = _lat;
             var temp_lng = _lng;
-            _lat = parseInt($('#lat').val()); // -16, 54
+            _lat = parseFloat($('#lat').val()); // -16, 54
             if(_lat < -16 || _lat > 54)
             {
                 alert("Invalid input!");
@@ -88,7 +108,7 @@ $(function(){
                 _lng = temp_lng;
                 return false;
             }
-            _lng = parseInt($('#lng').val()); // 61, 179
+            _lng = parseFloat($('#lng').val()); // 61, 179
             if(_lng < 61 || _lng > 179)
             {
                 alert("Invalid input!");
@@ -173,7 +193,7 @@ $(function(){
             b = data[2];
             
             console.log(data);
-            //addMarker(lat, lng);
+            //addMarker(23, 120);
         }
         function Description_O (data)
         {
@@ -208,8 +228,9 @@ $(function(){
             console.log(data);
             console.log("data[0]:", data[0]);
             console.log("data[1]:", data[1]);
-
+            addMarker(lat, lng);
         }
+
         function changepinImage()
         {
             //console.log('hi');
@@ -245,10 +266,12 @@ $(function(){
             //addMarker(output.lat, output.lng);
             requestAnimationFrame(domUpdater);
         }
-        requestAnimationFrame(domUpdater); // Refresh Page
 
-        /*function addMarker(lat, lng)
+        requestAnimationFrame(domUpdater); // Refresh Page
+var last_string;
+        function addMarker(lat, lng)
         {
+console.log("LOL");
             if(lat == 0 && lng == 0)
                 return;
             var index;
@@ -257,8 +280,9 @@ $(function(){
             var _lat = lat;
             var _lng = lng;
             string = '('  + lat + ',' + lng + ')' + '\n';
-            //markersDom.append(document.createTextNode(string));
-            markersDom.append('<button class=".btn-default delete" value = "'+index+'">'+string+'</button>');
+            if(markersDom.val() != string)
+                markersDom.append('<button class=".btn-default delete" value = "'+index+'">'+string+'</button>');
+            
             changepinImage();
             console.log(pinColor);
             var infowindow = new google.maps.InfoWindow(
@@ -272,30 +296,19 @@ $(function(){
             marker.addListener('click', function() {
                                infowindow.open(map, marker);
                                });
-            markers.push(marker);
+            if(markersDom.val() != string)
+                markers.push(marker);
+            markersDom.val(string)
 
-        }*/
-        $(document).on('click', '.delete', function(){
-                $(this).remove();
+        }
+        $(document).on('click', '.delete', function(){                
                 index = $(this).val();
                 markers[index].setMap(null);
+                $(this).remove();
             });
-console.log('call ida la');
-        //addMarker(output.lat, output.lng);
-
-        /*var i = 0, total_Marker = 5;
-        function succesiveMarker() {
-            console.log('i:'+i);
-            if( i < total_Marker )
-            {
-                addMarker(output.lat+i/100, output.lng+i/100);
-                setTimeout( succesiveMarker, 2000 );
-                i++;
-            }
-        }*/
-        //succesiveMarker();
+        
        function setMapOnAll(map) {
-          for (var i = 1; i < markers.length; i++) {
+          for (var i = 0; i < markers.length; i++) {
             markers[i].setMap(map);
           }
         }
@@ -304,7 +317,6 @@ console.log('call ida la');
         }
         function deleteMarkers() {
           clearMarkers();
-          markers = [];
         }
 
         function moveToLocation(lat, lng, zoom){
@@ -320,15 +332,13 @@ console.log('call ida la');
             output.lat = position.coords.latitude;
             output.lng = position.coords.longitude;
         }
-        //var kk = 0;
+
         function iotUpdater() {
-            //console.log(kk);
             if( navigator.geolocation )
             {
                 navigator.geolocation.getCurrentPosition(showPosition);
                 //deleteMarkers();
                 i = 0;
-                //succesiveMarker();
             }
         
             //if( window.d_name )
@@ -409,30 +419,101 @@ console.log('call ida la');
         setTimeout(iotUpdater, interval); // Will this cause loop?
         //requestAnimationFrame(domUpdater);
         
-        function detach() {
+        /*function detach() {
             window.d_name = null;
             IoTtalk.detach(mac);
-        }
-        window.onunload = detach;
+        }*/
+        /*window.onunload = detach;
         window.onbeforeunload = detach;
         window.onclose = detach;
-        window.onpagehide = detach;// Didn't use , what's the purpose?
-console.log('call profile la');
+        window.onpagehide = detach;*/// Didn't use , what's the purpose?
+        function QuadTree (points) {
+    this.root = null;
+    this.size =0;
+    for(var i = 0; i < points.length; i++)
+         this.add(points[i]);
+}
+function withinBounds(p, r) {
+    return  p.x > r.x1 && p.x < r.x2 && p.y > r.y1 && p.y < r.y2;
+}
+QuadTree.prototype.queryRectangle = function(bounds) {
+    console.log("Root:"+this.root.value[0].getPosition());
+    var points = [];
+    this.query2D(this.root, bounds, points);
+    return points;
+};
+// This is the problem function
+QuadTree.prototype.query2D = function( h,  r, points) {
+    if(h==null) return ;
+    var ne = r.getNorthEast();
+    var sw = r.getSouthWest();
+
+    var xmin = sw.lng();
+    var xmax = ne.lng();
+    var ymin = ne.lat();
+    var ymax = sw.lat();
+
+    var rect = {x1: xmin, x2: xmax, y1: ymax, y2: ymin};
+    if(withinBounds(h, rect)) {
+        console.log("Found "+h.x+" "+h.y);
+        for(var i = 0; i < h.value.length; i++) {
+            var p = h.value[i];
+            points.push(p);
+        }
+     }
+     if ( (xmin < h.x) &&  (ymin < h.y)){this.query2D(h.SW, r, points);};
+     if ( (xmin < h.x) && !(ymax < h.y)){this.query2D(h.NW, r, points);};
+     if (!(xmax < h.x) &&  (ymin < h.y)){this.query2D(h.SE, r, points);};
+     if (!(xmax < h.x) && !(ymax < h.y)){this.query2D(h.NE, r, points);};
+};
+// Other functions to make the quadtree work
+QuadTree.prototype.add = function(p) {
+    this.size++;
+    console.log("adding node"+p.getPosition());
+    this.root = this.insert(this.root,p);
+};
+QuadTree.prototype.insert = function insert(h, p) {
+    if(h== null) return new QuadTreeNode(p);
+    else if ( eq(p,h)) h.value.push(p);
+    else if ( lessX(p,h) &&  lessY(p,h)) h.SW = this.insert(h.SW, p);
+    else if ( lessX(p,h) && !lessY(p,h)) h.NW = this.insert(h.NW, p);
+    else if (!lessX(p,h) &&  lessY(p,h)) h.SE = this.insert(h.SE, p);
+    else if (!lessX(p,h) && !lessY(p,h)) h.NE = this.insert(h.NE, p);
+    return h;
+};
+function  lessX( p,  h) {
+    return p.getPosition().lat() < h.x;
+}
+function  lessY( p,  h) {
+    return p.getPosition().lng() < h.y;
+}
+function eq( p,  h) {
+    return p.getPosition().lat() == h.x && p.getPosition().lng() == h.y;
+}
+
+function QuadTreeNode(point) {
+    this.value = [point];
+    this.NW = null;
+    this.NE = null;
+    this.SW = null;
+    this.SE = null;
+    this.x = point.getPosition().lat();
+    this.y = point.getPosition().lng();
+}
         var profile = {
             'dm_name': 'BulbModified',
-            'odf_list': [Color_O, GeoLo_O, Description_O, EQ_O],
-            'idf_list': [Color_I, GeoLo_I, Description_I, EQ_I],
-            'origin_odf_list': [Color_O, GeoLo_O, Description_O, EQ_O],
-            'origin_idf_list': [Color_I, GeoLo_I, Description_I, EQ_I],
+            'odf_list': [GeoLo_O,Color_O, Description_O, EQ_O/*, GeoLo_O*/],
+            'idf_list': [GeoLo_I,Color_I, Description_I, EQ_I/*, GeoLo_I*/],
+            'origin_odf_list': [GeoLo_O,Color_O, Description_O, EQ_O/*, GeoLo_O*/],
+            'origin_idf_list': [GeoLo_I,Color_I, Description_I, EQ_I/*, GeoLo_I*/],
             'is_sim': false,
-            'df_list':['Color-O', 'GeoLo-O', 'Description-O', 'EQ-O', 'Color-I', 'GeoLo-I', 'Description-I', 'EQ-I'],
+            'df_list':['GeoLo-O','Color-O', 'Description-O', 'EQ-O'/*, 'GeoLo-O'*/,'GeoLo-I', 'Color-I', 'Description-I', 'EQ-I'/*, 'GeoLo-I'*/],
         }
 console.log('call ida la');
         var ida = {
             'iot_app': iot_app,
         }; // How iot device receive data (format)
  console.log('call dai la');
-        dai(profile,ida);
-       
+        dai(profile,ida);       
         
 });
